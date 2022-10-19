@@ -5,10 +5,10 @@
 #include <SPI.h>
 #include "WIFI_SET.h"
 
-int Led = 13; // define LED pin
-int P_I = 14; // define photo interrupter signal pin
-int val; //define a numeric variable
-int val1;
+int Led = 13; // 設定LED腳位
+int P_I = 14; // 設定 photo interrupter 腳位
+int val; //設定變數
+int val1; //設定變數1
 
 void setup()
 {
@@ -21,15 +21,15 @@ void setup()
     Serial.print("Connected to WiFi network with IP Address: ");
     Serial.println(WiFi.localIP());
     delay(5000);
-    pinMode(Led, OUTPUT); // LED pin as output
-    pinMode(P_I, INPUT); //photo interrupter pin as input
+    pinMode(Led, OUTPUT); // LED 腳位作為輸出
+    pinMode(P_I, INPUT); //photo interrupter 腳位作為輸出
 }
 
 void loop()
 {
-    val=digitalRead(P_I); //read the value of the sensor
+    val=digitalRead(P_I); //讀取感應器的值
     val1 = analogRead(P_I);
-    if(val == HIGH) // turn on LED when sensor is blocked
+    if(val == HIGH) // 當感應器被觸發時LED亮
     {
         digitalWrite(Led,HIGH);
         Serial.println(val1);
