@@ -7,8 +7,17 @@
 
 int Led = 13; // 設定LED腳位
 int P_I = 14; // 設定 photo interrupter 腳位
-int val; //設定變數
-int val1; //設定變數1
+String val; //設定變數
+String val1; //設定變數1
+
+const String serverName = "http://192.168.0.111:3000/api/PhotoInterrupter/";
+
+unsigned long lastTime = 0;
+// 如果要設定為10分鐘 timerDelay = 600000;
+// 如果要設定為5秒鐘 timerDelay = 1000;
+// 如果要設定為10分鐘 timerDelay = 600000;
+// 如果要設定為5秒鐘 timerDelay = 1000;
+unsigned long timerDelay = 1000;
 
 void setup()
 {
@@ -27,16 +36,55 @@ void setup()
 
 void loop()
 {
-    val=digitalRead(P_I); //讀取感應器的值
-    val1 = analogRead(P_I);
-    if(val == HIGH) // 當感應器被觸發時LED亮
-    {
-        digitalWrite(Led,HIGH);
-        Serial.println(val1);
-    }
-    else
-    {
-        digitalWrite(Led,LOW);
-        Serial.println(val1);
+    if ((millis() - lastTime) > timerDelay) {
+    //檢查 WIFI 連接狀況
+        if(WiFi.status()== WL_CONNECTED){
+            WiFiClient client;
+            HTTPClient http;
+            //URL路徑或IP位置
+            String serverName = "http://192.168.0.111:3000/api/PhotoInterrupter/";
+            val=digitalRead(P_I); //讀取感應器的值
+            val1 = analogRead(P_I);
+            Serial.println(val1);
+            if(val1 == "1023") // 當感應器被觸發時LED亮
+            {
+                Serial.println("correct");
+                serverName = serverName + "ture" ;
+                digitalWrite(Led,HIGH);
+            }
+            else
+            {
+                Serial.println("error");
+                serverName = serverName + "false";
+                digitalWrite(Led,LOW);
+            }
+            String serverPath = serverName ;
+            serverName=serverName+ "/";
+            Serial.println(serverName);
+      
+            // Your Domain name with URL path or IP address with path
+            http.begin(client, serverPath.c_str());
+      
+            // 發送 HTTP GET request
+            int httpResponseCode = http.GET();
+      
+            if (httpResponseCode>0) {
+                Serial.print("HTTP Response code: ");
+                Serial.println(httpResponseCode);
+                String payload = http.getString();
+                Serial.println(payload);
+            }
+            else {
+                Serial.print("Error code: ");
+                Serial.println(httpResponseCode);
+            }
+            http.end();
+        }
+        else {
+            Serial.println("WiFi Disconnected");
+        }
+        lastTime = millis();
+        val = "";
+        val1 = "";
     }
 }
